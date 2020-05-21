@@ -1,0 +1,2 @@
+C:\Users\86153\source\repos\chenjiaqiang-a\final-work-of-Cpp\webSpider\Debug\webSpider.exe
+C:\Users\86153\source\repos\chenjiaqiang-a\final-work-of-Cpp\webSpider\Debug\webSpider.pdb
