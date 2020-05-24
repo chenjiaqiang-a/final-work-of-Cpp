@@ -1,0 +1,2 @@
+C:\Users\86153\source\repos\chenjiaqiang-a\final-work-of-Cpp\2048\Debug\2048.exe
+C:\Users\86153\source\repos\chenjiaqiang-a\final-work-of-Cpp\2048\Debug\2048.pdb
