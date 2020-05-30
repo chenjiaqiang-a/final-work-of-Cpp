@@ -12,6 +12,7 @@ class MainScene : public Scene
 private:
 	Matrix<Point>* pos;
 	Matrix<int>* num;
+	Matrix<Brick* >* bricks;
 	Button* startButton = nullptr;
 	Button* replayButton = nullptr;
 public:
@@ -33,18 +34,19 @@ public:
 MainScene::MainScene()
 {
 	pos = gcnew Matrix<Point>(4, 4);
+	num = gcnew Matrix<int>(4, 4);
+	bricks = gcnew Matrix<Brick*>(4, 4);
 	for(int i = 0; i < 4; ++i)
 		for (int j = 0; j < 4; ++j)
 		{
 			Point position(i * Window::getWidth() / 4, j * Window::getHeight() / 4);
 			pos->setValue(i, j, position);
-		}
 
-	num = gcnew Matrix<int>(4, 4);
-	for (int i = 0; i < 4; ++i)
-		for (int j = 0; j < 4; ++j)
 			num->setValue(i, j, 0);
-	
+
+			bricks->setValue(i, j, nullptr);
+		}
+			
 	auto startText = gcnew Text(L"¿ªÊ¼ÓÎÏ·");
 	startButton = gcnew Button(startText);
 	startButton->setAnchor(0.5, 0.5);
@@ -132,10 +134,10 @@ void MainScene::newBrick()
 		return;
 
 	int rand_num = rand() / number;
-	auto brick = gcnew Brick;
-	brick->setPos(pos->getValue(is[rand_num], js[rand_num]));
+	bricks->getValue(is[rand_num], js[rand_num]) = gcnew Brick;
+	(bricks->getValue(is[rand_num], js[rand_num]))->setPos(pos->getValue(is[rand_num], js[rand_num]));
 	num->setValue(is[rand_num], js[rand_num], 2);
-	this->addChild(brick);
+	this->addChild(bricks->getValue(is[rand_num], js[rand_num]));
 }
 
 void MainScene::end()

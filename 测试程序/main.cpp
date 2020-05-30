@@ -15,5 +15,16 @@ int main(){
 		cout<<"\n";
 	}
 	
+	for(int i = 0; i < 4; i++)
+		for(int j = 0; j < 4; j++)
+			m.getValue(i, j) = -(i+j);
+	
+	for(int i=0;i<4;i++){
+		for(int j=0;j<4;j++){
+			cout<<m.getValue(i,j)<<" ";
+		}
+		cout<<"\n";
+	}
+	
 	return 0;
 }

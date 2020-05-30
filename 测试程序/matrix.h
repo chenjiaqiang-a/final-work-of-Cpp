@@ -20,7 +20,7 @@ public:
 	{
 		matrix[x][y] = value;
 	}
-	_T getValue(int x, int y)
+	_T& getValue(int x, int y)
 	{
 		return matrix[x][y];
 	}
