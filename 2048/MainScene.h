@@ -16,16 +16,18 @@ private:
 	Button* replayButton = nullptr;
 public:
 	MainScene();
-	void start();
-	void clear();
-	void newBrick();
+	void start();          //点击"开始游戏"或"再来一局",执行strat进行场景初始化
+	void clear();          //清楚上次游戏的痕迹
+	void newBrick();       //在空白位子随机产生一个brick
+	//-----玩家操作-----
 	void pressLeft();
 	void pressRight();
 	void pressUp();
 	void PressDown();
-	bool isGameOver();
-	void end();
-	void onUpdate();
+	//------------------
+	bool isGameOver();     //判断是否游戏结束
+	void end();            //一场游戏结束后调用end
+	void onUpdate();       //事件循环,处理玩家命令
 };
 
 MainScene::MainScene()
@@ -49,7 +51,7 @@ MainScene::MainScene()
 	startButton->setPos(Window::getWidth() / 2, Window::getHeight() / 2);
 	this->addChild(startButton);
 
-	auto replayText = gcnew Text(L"开始游戏");
+	auto replayText = gcnew Text(L"再来一局");
 	replayButton = gcnew Button(replayText);
 	replayButton->setAnchor(0.5, 0.5);
 	replayButton->setPos(Window::getWidth() / 2, Window::getHeight() / 2);
