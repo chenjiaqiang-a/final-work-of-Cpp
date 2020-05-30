@@ -1,12 +1,10 @@
 #include <easy2d/easy2d.h>
-
+#include "brick.h"
 
 using namespace easy2d;
 
 constexpr auto WIDTH = 120;
 constexpr auto HEIGHT = 120;
-
-using namespace easy2d;
 
 int main()
 {
@@ -18,6 +16,16 @@ int main()
 
         auto scene = gcnew Scene;
         SceneManager::enter(scene);
+
+        auto brick1 = gcnew Brick;
+        auto brick2 = gcnew Brick;
+
+        brick1->setPos(0, 0);
+        brick2->setPos(30, 30);
+        brick2->doubleNum();
+
+        scene->addChild(brick1);
+        scene->addChild(brick2);
 
         //auto scene = gcnew MainScene;                   // 创建一个场景
         //SceneManager::enter(scene);                 // 进入该场景

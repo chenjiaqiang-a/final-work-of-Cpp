@@ -9,7 +9,7 @@ protected:
 	int Ynum;
 	std::vector<std::vector<_T>> matrix;
 public:
-	vector2(int m, int n) {
+	Matrix(int m, int n) {
 		this->Xnum = m;
 		this->Ynum = n;
 		for (int i = 0; i < m; ++i)
