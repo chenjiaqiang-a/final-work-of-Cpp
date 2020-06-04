@@ -1,8 +1,11 @@
 #pragma once
 #include <vector>
+#include <easy2d/easy2d.h>
+
+using namespace easy2d;
 
 template<class _T>
-class Matrix
+class Matrix : public Node
 {
 protected:
 	int Xnum;
