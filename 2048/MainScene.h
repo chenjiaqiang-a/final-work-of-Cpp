@@ -1,8 +1,12 @@
 #pragma once
+/*
+---*---主场景类---*---
+完成者: 陈家强, 张涔
+*/
+
 #include <easy2d/easy2d.h>
-#include <random>
 #include <vector>
-#include "2Dmatrix.h"
+#include <iostream>
 #include "brick.h"
 
 using namespace easy2d;
@@ -10,27 +14,23 @@ using namespace easy2d;
 class MainScene : public Scene
 {
 private:
-	Matrix<Point>* pos;
-	Matrix<int>* num;
-	Matrix<Brick* >* bricks;
-	Button* startButton = nullptr;
-	Button* replayButton = nullptr;
+	int score;                             //记录分数
+	int num[4][4];                         //4 X 4 的矩阵，游戏的数字抽象
+	Brick* bricks[4][4];                   //全屏16个图片
+	Button* startButton = nullptr;         //开始按钮
+	Button* replayButton = nullptr;        //重玩按钮
 public:
-	MainScene();
+	MainScene();           //构造函数
 	void start();          //点击"开始游戏"或"再来一局",执行strat进行场景初始化
 	void clear();          //清楚上次游戏的痕迹
 	void newBrick();       //在空白位子随机产生一个brick
-	//-----玩家操作-----
-	void moveBrick(int, int, int, int);
-	void move_to_left(int,int);
-	void move_to_right(int, int);
-	void move_to_up(int, int);
-	void move_to_down(int, int);
-	void pressLeft();
-	void pressRight();
-	void pressUp();
-	void pressDown();
-	//------------------
+	//-----游戏中的操作-----
+	void update_screen();  //刷新屏幕
+	void move_to_left();   //向左移动
+	void move_to_right();  //向右移动
+	void move_to_up();     //向上移动
+	void move_to_down();   //向下移动
+	//----------------------
 	bool isGameOver();     //判断是否游戏结束
 	void end();            //一场游戏结束后调用end
 	void onUpdate();       //事件循环,处理玩家命令
@@ -38,24 +38,21 @@ public:
 
 MainScene::MainScene()
 {
-	pos = gcnew Matrix<Point>(4, 4);
-	num = gcnew Matrix<int>(4, 4);
-	bricks = gcnew Matrix<Brick*>(4, 4);
-	this->addChild(pos);
-	this->addChild(num);
-	this->addChild(bricks);
-	for(int i = 0; i < 4; ++i)
+	score = 0;                                               //初始化分数为0，数字矩阵为0，向场景中导入16张图片并隐藏
+	for (int i = 0; i < 4; ++i)
 		for (int j = 0; j < 4; ++j)
 		{
-			Point position(i * Window::getWidth() / 4, j * Window::getHeight() / 4);
-			pos->setValue(i, j, position);
-
-			num->setValue(i, j, 0);
-
-			bricks->setValue(i, j, nullptr);
+			num[i][j] = 0;
+			bricks[i][j] = gcnew Brick;
+			Point pos(j * Window::getWidth() / 4, i * Window::getHeight() / 4);
+			bricks[i][j]->setPos(pos);
+			this->addChild(bricks[i][j]);
+			bricks[i][j]->setVisible(false);
 		}
-			
-	auto startText = gcnew Text(L"开始游戏");
+
+	std::cout << Window::getHeight() << " " << Window::getWidth() / 4 << "\n" << bricks[0][1]->getHeight() << " " << bricks[0][1]->getWidth() << " " << bricks[0][1]->getPosX()<<" "<< bricks[0][1]->getPosY();
+
+	auto startText = gcnew Text(L"开始游戏");                //创建开始按钮和重玩按钮
 	startButton = gcnew Button(startText);
 	startButton->setAnchor(0.5, 0.5);
 	startButton->setPos(Window::getWidth() / 2, Window::getHeight() / 2);
@@ -68,62 +65,65 @@ MainScene::MainScene()
 	this->addChild(replayButton);
 	replayButton->setVisible(false);
 
-	auto func = std::bind(&MainScene::start, this);
+	auto func = std::bind(&MainScene::start, this);         //设置按钮点击函数
 	startButton->setClickFunc(func);
 	replayButton->setClickFunc(func);
+
+	this->setAutoUpdate(false);
 }
 
 void MainScene::start()
 {
-	startButton->setVisible(false);
+	startButton->setVisible(false);        //隐藏按钮,清空场景
 	replayButton->setVisible(false);
 
 	clear();
 
 	newBrick();
-
+	newBrick();
+	this->setAutoUpdate(true);
 }
 
 void MainScene::onUpdate()
 {
-	if (num && pos)
+	if (Input::isDown(KeyCode::Left))
 	{
-		if (Input::isDown(KeyCode::Left))
-		{
-			pressLeft();
-			if (isGameOver())
-				end();
-		}
-		else if (Input::isDown(KeyCode::Right))
-		{
-			pressRight();
-			if (isGameOver())
-				end();
-		}
-		else if (Input::isDown(KeyCode::Up))
-		{
-			pressUp();
-			if (isGameOver())
-				end();
-		}
-		else if (Input::isDown(KeyCode::Down))
-		{
-			pressDown();
-			if (isGameOver())
-				end();
-		}
+		move_to_left();
+		if (isGameOver())
+			end();
+		Sleep(200);
+	}
+	else if (Input::isDown(KeyCode::Right))
+	{
+
+		move_to_right();
+		if (isGameOver())
+			end();
+		Sleep(200);
+	}
+	else if (Input::isDown(KeyCode::Up))
+	{
+		move_to_up();
+		if (isGameOver())
+			end();
+		Sleep(200);
+	}
+	else if (Input::isDown(KeyCode::Down))
+	{
+		move_to_down();
+		if (isGameOver())
+			end();
+		Sleep(200);
 	}
 }
 
 void MainScene::clear()
-{	
+{
 	for (int i = 0; i < 4; i++)
 		for (int j = 0; j < 4; j++)
 		{
-			num->setValue(i, j, 0);
-			(bricks->getValue(i, j))->removeFromParent();
-			delete bricks->getValue(i, j);
-			bricks->setValue(i, j, nullptr);
+			num[i][j] = 0;
+			bricks[i][j]->setVisible(false);
 		}
 }
 
@@ -131,10 +131,10 @@ void MainScene::newBrick()
 {
 	std::vector<int> is, js;
 	int number = 0;
-	
+
 	for (int i = 0; i < 4; i++)
 		for (int j = 0; j < 4; j++)
-			if (num->getValue(i, j) == 0)
+			if (num[i][j] == 0)
 			{
 				is.push_back(i);
 				js.push_back(j);
@@ -144,219 +144,266 @@ void MainScene::newBrick()
 	if (number == 0)
 		return;
 
-	int rand_num = rand() / number;
-	bricks->getValue(is[rand_num], js[rand_num]) = gcnew Brick;
-	(bricks->getValue(is[rand_num], js[rand_num]))->setPos(pos->getValue(is[rand_num], js[rand_num]));
-	num->setValue(is[rand_num], js[rand_num], 2);
-	this->addChild(bricks->getValue(is[rand_num], js[rand_num]));
+	int rand_num = Random::range(0, number - 1);
+	bricks[is[rand_num]][js[rand_num]]->set_num();
+
+	num[is[rand_num]][js[rand_num]] = bricks[is[rand_num]][js[rand_num]]->get_num();
+	bricks[is[rand_num]][js[rand_num]]->setVisible(true);
 }
 
 void MainScene::end()
 {
+	this->setAutoUpdate(false);
 	replayButton->setVisible(true);
 }
 
 bool MainScene::isGameOver()
 {
-	int x[4] = { 0, 0, 1,-1},
-		y[4] = { 1,-1, 0, 0};
-	for(int i = 0; i < 4; i++)
+	int x[4] = { 0, 0, 1,-1 },
+		y[4] = { 1,-1, 0, 0 };
+	for (int i = 0; i < 4; i++)
 		for (int j = 0; j < 4; ++j)
 		{
-			if (num->getValue(i, j) == 0)
+			if (num[i][j] == 0)
 				return false;
-			if (num->getValue(i, j) == 2048)
+			if (num[i][j] == 2048)
 				return true;
-			for(int p = 0; p < 4; p++)
-				for (int k = 0; k < 4; k++)
-				{
-					int xl = i + x[p], yl = j + y[k];
-					if (xl >= 0 && xl < 4 && yl>0 && yl < 4 && (num->getValue(i, j) == num->getValue(xl, yl)))
-						return false;
-				}
+			for (int p = 0; p < 4; p++)
+			{
+				int xl = i + x[p], yl = j + y[p];
+				if (xl >= 0 && xl < 4 && yl>0 && yl < 4 && (num[i][j] == num[xl][yl]))
+					return false;
+			}
 		}
 	return true;
 }
 
-
-void MainScene::moveBrick(int prex, int prey, int x, int y)
-{
-	int temp_num = num->getValue(x, y);
-	Brick* temp_brick = bricks->getValue(x, y);
-	num->setValue(x, y, num->getValue(prex, prey));
-	num->setValue(prex, prey, temp_num);
-	bricks->setValue(x, y, bricks->getValue(prex, prey));
-	bricks->setValue(prex, prey, temp_brick);
-}
-
-void MainScene::move_to_down(int i, int j)
-{
-	for (int p = j; p >= 0; p--)                     //将方块全部移向底部
-		if (num->getValue(p, i) == 0)
-		{
-			int q = p - 1;
-			while (q >= 0)
-			{
-				if (num->getValue(q, i) != 0)
-					moveBrick(q, i, p, i);
-				q--;
-			}
-		}
-}
-
-void MainScene::pressDown()
+void MainScene::update_screen()
 {
 	for (int i = 0; i < 4; i++)
-	{
-		move_to_down(i, 3);
-
-		int j = 3;
-		while (j > 0)
+		for (int j = 0; j < 4; j++)
 		{
-			if (num->getValue(j, i) != 0 && num->getValue(j, i) == num->getValue(j - 1, i))
-			{//合并+移动
-				num->getValue(j, i) *= 2;
-				(bricks->getValue(j, i))->doubleNum();
-				num->setValue(j - 1, i, 0);
-				delete bricks->getValue(j - 1, i);
-				bricks->setValue(j - 1, i, nullptr);
-				
-				move_to_down(i, j);
-				j++;
+			if (num[i][j] != 0)
+			{
+				bricks[i][j]->set_num(num[i][j]);
+				bricks[i][j]->setVisible(true);
 			}
 			else
-				j--;
+			{
+				bricks[i][j]->setVisible(false);
+			}
 		}
+}
 
+void MainScene::move_to_left()
+{
+	int k, tag = 0;
+	for (int i = 0; i < 4; i++)
+	{
+		int b[4] = { 0 };
+		k = 0;
+		for (int j = 0; j < 3; j++)
+		{
+			if (num[i][j] != 0)
+			{
+				int flag = 0;
+				for (int l = j + 1; l < 4; l++)
+				{
+					if (num[i][l] != 0)
+					{
+						flag = 1;
+						if (num[i][l] == num[i][j])
+						{
+							b[k++] = 2 * num[i][j];
+							score++;
+							num[i][j] = num[i][l] = 0;
+							break;
+						}
+						else
+						{
+							b[k++] = num[i][j];
+							break;
+						}
+					}
+				}
+				if (flag == 0)
+					b[k++] = num[i][j];
+			}
+		}
+		b[k] = num[i][3];
+		for (int j = 0; j < 4; j++)
+		{
+			if (num[i][j] != b[j])
+			{
+				tag = 1;
+				break;
+			}
+		}
+		for (int j = 0; j < 4; j++)
+			num[i][j] = b[j];
+	}
+	if (tag)
+	{
+		update_screen();
 		newBrick();
 	}
 }
 
-void MainScene::move_to_up(int i, int j)
+void MainScene::move_to_right()
 {
-	for (int p = j; p < 4; p++)                     //将方块全部移向底部
-		if (num->getValue(p, i) == 0)
-		{
-			int q = p + 1;
-			while (q < 4)
-			{
-				if (num->getValue(q, i) != 0)
-					moveBrick(q, i, p, i);
-				q++;
-			}
-		}
-}
-
-void MainScene::pressUp()
-{
+	int k, tag = 0;
 	for (int i = 0; i < 4; i++)
 	{
-		move_to_up(i, 0);
-
-		int j = 0;
-		while (j < 3)
+		int b[4] = { 0 };
+		k = 3;
+		for (int j = 3; j > 0; j--)
 		{
-			if (num->getValue(j, i) != 0 && num->getValue(j, i) == num->getValue(j + 1, i))
-			{//合并+移动
-				num->getValue(j, i) *= 2;
-				(bricks->getValue(j, i))->doubleNum();
-				num->setValue(j + 1, i, 0);
-				delete bricks->getValue(j + 1, i);
-				bricks->setValue(j + 1, i, nullptr);
-
-				move_to_up(i, j);
-				j++;
+			if (num[i][j] != 0)
+			{
+				int flag = 0;
+				for (int l = j - 1; l >= 0; l--)
+				{
+					if (num[i][l] != 0)
+					{
+						flag = 1;
+						if (num[i][l] == num[i][j])
+						{
+							b[k--] = 2 * num[i][j];
+							score++;
+							num[i][j] = num[i][l] = 0;
+							break;
+						}
+						else
+						{
+							b[k--] = num[i][j];
+							break;
+						}
+					}
+				}
+				if (flag == 0)
+					b[k--] = num[i][j];
 			}
-			else
-				j++;
 		}
-
+		b[k] = num[i][0];
+		for (int j = 0; j < 4; j++)
+		{
+			if (num[i][j] != b[j])
+			{
+				tag = 1;
+				break;
+			}
+		}
+		for (int j = 0; j < 4; j++)
+			num[i][j] = b[j];
+	}
+	if (tag)
+	{
+		update_screen();
 		newBrick();
 	}
 }
 
-void MainScene::move_to_right(int i, int j)
+void MainScene::move_to_up()
 {
-	for (int p = j; p >= 0; p--)                     //将方块全部移向底部
-		if (num->getValue(i, p) == 0)
-		{
-			int q = p - 1;
-			while (q >= 0)
-			{
-				if (num->getValue(i, q) != 0)
-					moveBrick(i, q, i, p);
-				q--;
-			}
-		}
-}
-
-void MainScene::pressRight()
-{
+	int k, tag = 0;
 	for (int i = 0; i < 4; i++)
 	{
-		move_to_right(i, 3);
-
-		int j = 3;
-		while (j > 0)
+		int b[4] = { 0 };                 //定义一个临时数组来存储相加之后的情况		
+		k = 0;
+		for (int j = 0; j < 3; j++)
 		{
-			if (num->getValue(i, j) != 0 && num->getValue(i, j) == num->getValue(i, j - 1))
-			{//合并+移动
-				num->getValue(i, j) *= 2;
-				(bricks->getValue(i, j))->doubleNum();
-				num->setValue(i, j - 1, 0);
-				delete bricks->getValue(i, j - 1);
-				bricks->setValue(i, j - 1, nullptr);
-
-				move_to_right(i, j);
-				j++;
+			if (num[j][i] != 0)
+			{
+				int flag = 0;
+				for (int l = j + 1; l < 4; l++)
+				{    //找是否有相同的数				
+					if (num[l][i] != 0)
+					{
+						flag = 1;
+						if (num[l][i] == num[j][i])
+						{
+							b[k++] = 2 * num[j][i];
+							score++;
+							num[l][i] = num[j][i] = 0;
+							break;
+						}
+						else
+						{
+							b[k++] = num[j][i];
+							break;
+						}
+					}
+				}
+				if (flag == 0)
+					b[k++] = num[j][i];
 			}
-			else
-				j--;
 		}
-
+		b[k] = num[3][i];
+		for (int j = 0; j < 4; j++)
+		{
+			if (num[j][i] != b[j])
+			{
+				tag = 1;
+				break;
+			}
+		}
+		for (int j = 0; j < 4; j++)
+			num[j][i] = b[j];      //将结果覆盖回去		
+	}
+	if (tag)
+	{
+		update_screen();
 		newBrick();
 	}
 }
 
-void MainScene::move_to_left(int i, int j)
+void MainScene::move_to_down()
 {
-	for (int p = j; p < 4; p++)                     //将方块全部移向底部
-		if (num->getValue(i, p) == 0)
-		{
-			int q = p + 1;
-			while (q < 4)
-			{
-				if (num->getValue(i, q) != 0)
-					moveBrick(i, q, i, p);
-				q++;
-			}
-		}
-}
-
-void MainScene::pressLeft()
-{
-	for (int i = 0; i < 4; i++)
+	int k, tag = 0;
+	for (int i = 0; i < 4; i++)  //从每一列开始
 	{
-		move_to_left(i, 0);
-
-		int j = 0;
-		while (j < 3)
+		int b[4] = { 0 };				 //定义一个临时数组来存储相加之后的情况		
+		k = 3;
+		for (int j = 3; j > 0; j--)
 		{
-			if (num->getValue(i, j) != 0 && num->getValue(i, j) == num->getValue(i, j + 1))
-			{//合并+移动
-				num->getValue(i, j) *= 2;
-				(bricks->getValue(i, j))->doubleNum();
-				num->setValue(i, j + 1, 0);
-				delete bricks->getValue(i, j + 1);
-				bricks->setValue(i, j + 1, nullptr);
-
-				move_to_left(i, j);
-				j++;
+			if (num[j][i] != 0) {
+				int flag = 0;
+				for (int l = j - 1; l >= 0; l--) //找是否有相同的数	
+				{
+					if (num[l][i] != 0)
+					{
+						flag = 1;
+						if (num[l][i] == num[j][i])
+						{
+							b[k--] = 2 * num[j][i];
+							score++;
+							num[l][i] = num[j][i] = 0;
+							break;
+						}
+						else
+						{
+							b[k--] = num[j][i];
+							break;
+						}
+					}
+				}
+				if (flag == 0)b[k--] = num[j][i];
 			}
-			else
-				j++;
 		}
-
+		b[k] = num[0][i];                 //最后一个没有检查，赋值过去，不管是否为0，都无所谓的		
+		for (int j = 0; j < 4; j++) //检查是否有移动
+		{
+			if (num[j][i] != b[j]) {
+				tag = 1;
+				break;
+			}
+		}
+		for (int j = 0; j < 4; j++)
+			num[j][i] = b[j];
+	}
+	if (tag)                        //存在移动，产生新的数
+	{
+		update_screen();
 		newBrick();
 	}
 }
