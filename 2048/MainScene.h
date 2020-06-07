@@ -1,12 +1,11 @@
 #pragma once
 /*
----*---主场景类---*---
+---*---主场景类(MainScene)---*---
 完成者: 陈家强, 张涔
 */
 
 #include <easy2d/easy2d.h>
 #include <vector>
-#include <iostream>
 #include "brick.h"
 
 using namespace easy2d;
@@ -14,16 +13,20 @@ using namespace easy2d;
 class MainScene : public Scene
 {
 private:
+	Sprite* bg = nullptr;                  //背景
 	int score;                             //记录分数
 	int num[4][4];                         //4 X 4 的矩阵，游戏的数字抽象
 	Brick* bricks[4][4];                   //全屏16个图片
-	Button* startButton = nullptr;         //开始按钮
-	Button* replayButton = nullptr;        //重玩按钮
+	Button* gameOver = nullptr;            //结束游戏按钮
+	Sprite* board = nullptr;               //游戏结束后的成绩显示面板
+	Text* scoreText = nullptr;             //成绩叙述文字
+	Text* scores = nullptr;                //具体成绩
 public:
 	MainScene();           //构造函数
-	void start();          //点击"开始游戏"或"再来一局",执行strat进行场景初始化
+	void start();          //开始一轮新游戏的初始化
 	void clear();          //清楚上次游戏的痕迹
 	void newBrick();       //在空白位子随机产生一个brick
+	void onUpdate();       //事件循环,处理玩家命令
 	//-----游戏中的操作-----
 	void update_screen();  //刷新屏幕
 	void move_to_left();   //向左移动
@@ -33,50 +36,58 @@ public:
 	//----------------------
 	bool isGameOver();     //判断是否游戏结束
 	void end();            //一场游戏结束后调用end
-	void onUpdate();       //事件循环,处理玩家命令
+	void GameOver();       //结束游戏返回菜单
 };
 
 MainScene::MainScene()
 {
+	bg = gcnew Sprite(L"./image/playbg.png");                //加载背景图片
+	bg->setPos(0, 0);
+	this->addChild(bg);
+
 	score = 0;                                               //初始化分数为0，数字矩阵为0，向场景中导入16张图片并隐藏
 	for (int i = 0; i < 4; ++i)
 		for (int j = 0; j < 4; ++j)
 		{
 			num[i][j] = 0;
 			bricks[i][j] = gcnew Brick;
-			Point pos(j * Window::getWidth() / 4, i * Window::getHeight() / 4);
+			Point pos(j * Window::getHeight() / 4, i * Window::getWidth() / 4);
 			bricks[i][j]->setPos(pos);
 			this->addChild(bricks[i][j]);
 			bricks[i][j]->setVisible(false);
 		}
+	  
+	board = gcnew Sprite(L"./image/board.png");             //结束面板设计
+	board->setAnchor(0.5, 0.5);
+	board->setPos(Window::getWidth() / 2, Window::getHeight() / 2);
 
-	std::cout << Window::getHeight() << " " << Window::getWidth() / 4 << "\n" << bricks[0][1]->getHeight() << " " << bricks[0][1]->getWidth() << " " << bricks[0][1]->getPosX()<<" "<< bricks[0][1]->getPosY();
+	scoreText = gcnew Text(L"得分: ");
+	scores = gcnew Text(L"0");
+	scoreText->setAnchor(0.5, 0.5);
+	scores->setAnchor(0.5, 0.5);
+	scoreText->setPos(board->getWidth() * 0.4, board->getHeight() * 0.3);
+	scores->setPos(board->getWidth() * 0.6, board->getHeight() * 0.3);
+	board->addChild(scoreText);
+	board->addChild(scores);
 
-	auto startText = gcnew Text(L"开始游戏");                //创建开始按钮和重玩按钮
-	startButton = gcnew Button(startText);
-	startButton->setAnchor(0.5, 0.5);
-	startButton->setPos(Window::getWidth() / 2, Window::getHeight() / 2);
-	this->addChild(startButton);
+	auto overpic = gcnew Sprite(L"./image/endButton.png");   //创建结束按钮
+	gameOver = gcnew Button(overpic);
+	gameOver->setAnchor(0.5, 0.5);
+	gameOver->setPos(board->getWidth() / 2, board->getHeight() * 0.6);
+	board->addChild(gameOver);
 
-	auto replayText = gcnew Text(L"再来一局");
-	replayButton = gcnew Button(replayText);
-	replayButton->setAnchor(0.5, 0.5);
-	replayButton->setPos(Window::getWidth() / 2, Window::getHeight() / 2);
-	this->addChild(replayButton);
-	replayButton->setVisible(false);
+	auto func = std::bind(&MainScene::GameOver, this);       //设置按钮点击函数
+	gameOver->setClickFunc(func);
 
-	auto func = std::bind(&MainScene::start, this);         //设置按钮点击函数
-	startButton->setClickFunc(func);
-	replayButton->setClickFunc(func);
+	this->addChild(board);
+	board->setVisible(false);
 
 	this->setAutoUpdate(false);
 }
 
 void MainScene::start()
-{
-	startButton->setVisible(false);        //隐藏按钮,清空场景
-	replayButton->setVisible(false);
-
+{//游戏开始清理场景, 随机初始化两个数字方块
+	board->setVisible(false);
 	clear();
 
 	newBrick();
@@ -85,7 +96,7 @@ void MainScene::start()
 }
 
 void MainScene::onUpdate()
-{
+{//检测玩家输入并做出反应
 	if (Input::isDown(KeyCode::Left))
 	{
 		move_to_left();
@@ -154,7 +165,15 @@ void MainScene::newBrick()
 void MainScene::end()
 {
 	this->setAutoUpdate(false);
-	replayButton->setVisible(true);
+	scores->setText(std::to_wstring(score));
+	board->setVisible(true);
+}
+
+void MainScene::GameOver()
+{
+	board->setVisible(false);
+	this->setVisible(false);
+	SceneManager::back();
 }
 
 bool MainScene::isGameOver()
@@ -401,9 +420,10 @@ void MainScene::move_to_down()
 		for (int j = 0; j < 4; j++)
 			num[j][i] = b[j];
 	}
-	if (tag)                        //存在移动，产生新的数
+	if (tag)
 	{
 		update_screen();
 		newBrick();
 	}
+	//存在移动，产生新的数
 }

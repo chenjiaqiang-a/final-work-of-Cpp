@@ -1,2 +1,7 @@
 ﻿  main.cpp
+C:\Users\86153\source\repos\chenjiaqiang-a\final-work-of-Cpp\2048\MainScene.h(68,64): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+C:\Users\86153\source\repos\chenjiaqiang-a\final-work-of-Cpp\2048\MainScene.h(68,38): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+C:\Users\86153\source\repos\chenjiaqiang-a\final-work-of-Cpp\2048\MainScene.h(69,61): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+C:\Users\86153\source\repos\chenjiaqiang-a\final-work-of-Cpp\2048\MainScene.h(69,35): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+C:\Users\86153\source\repos\chenjiaqiang-a\final-work-of-Cpp\2048\MainScene.h(76,61): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
   2048.vcxproj -> C:\Users\86153\source\repos\chenjiaqiang-a\final-work-of-Cpp\2048\Debug\2048.exe
