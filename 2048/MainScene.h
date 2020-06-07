@@ -88,6 +88,8 @@ MainScene::MainScene()
 void MainScene::start()
 {//游戏开始清理场景, 随机初始化两个数字方块
 	board->setVisible(false);
+	gameOver->setVisible(false);
+
 	clear();
 
 	newBrick();
@@ -167,11 +169,13 @@ void MainScene::end()
 	this->setAutoUpdate(false);
 	scores->setText(std::to_wstring(score));
 	board->setVisible(true);
+	gameOver->setVisible(true);
 }
 
 void MainScene::GameOver()
 {
 	board->setVisible(false);
+	gameOver->setVisible(false);
 	this->setVisible(false);
 	SceneManager::back();
 }

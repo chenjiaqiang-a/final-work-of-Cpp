@@ -12,10 +12,12 @@ public:
 	MenuScene();
 	void start();
 };
-MenuScene::MenuScene() {
+MenuScene::MenuScene()
+{
 	playScene = gcnew MainScene;
 	this->addChild(playScene);
 	playScene->setVisible(false);
+
 	bg = gcnew Sprite(L"./image/menubg.png");
 	bg->setPos(0, 0);
 	this->addChild(bg);
@@ -25,6 +27,7 @@ MenuScene::MenuScene() {
 	startButton->setAnchor(0.5, 0.5);
 	startButton->setPos(Window::getWidth() / 2, Window::getHeight() / 2);
 	bg->addChild(startButton);
+
 	auto func = std::bind(&MenuScene::start, this);
 	startButton->setClickFunc(func);
 }
