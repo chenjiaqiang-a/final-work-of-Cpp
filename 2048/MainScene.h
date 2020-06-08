@@ -17,7 +17,7 @@ private:
 	int score;                             //记录分数
 	int num[4][4];                         //4 X 4 的矩阵，游戏的数字抽象
 	Brick* bricks[4][4];                   //全屏16个图片
-	Button* gameOver = nullptr;            //结束游戏按钮
+	Button* gameOverButton = nullptr;      //结束游戏按钮
 	Sprite* board = nullptr;               //游戏结束后的成绩显示面板
 	Text* scoreText = nullptr;             //成绩叙述文字
 	Text* scores = nullptr;                //具体成绩
@@ -57,11 +57,11 @@ MainScene::MainScene()
 			bricks[i][j]->setVisible(false);
 		}
 	  
-	board = gcnew Sprite(L"./image/board.png");             //结束面板设计
+	board = gcnew Sprite(L"./image/board.png");             //结束面板设计，包括分数和结束游戏按钮
 	board->setAnchor(0.5, 0.5);
 	board->setPos(Window::getWidth() / 2, Window::getHeight() / 2);
 
-	scoreText = gcnew Text(L"得分: ");
+	scoreText = gcnew Text(L"得分: ");                      //向结束面板添加分数
 	scores = gcnew Text(L"0");
 	scoreText->setAnchor(0.5, 0.5);
 	scores->setAnchor(0.5, 0.5);
@@ -70,41 +70,41 @@ MainScene::MainScene()
 	board->addChild(scoreText);
 	board->addChild(scores);
 
-	auto overpic = gcnew Sprite(L"./image/endButton.png");   //创建结束按钮
-	gameOver = gcnew Button(overpic);
-	gameOver->setAnchor(0.5, 0.5);
-	gameOver->setPos(board->getWidth() / 2, board->getHeight() * 0.6);
-	board->addChild(gameOver);
+	auto overpic = gcnew Sprite(L"./image/endButton.png");   //向结束面板添加结束按钮
+	gameOverButton = gcnew Button(overpic);
+	gameOverButton->setAnchor(0.5, 0.5);
+	gameOverButton->setPos(board->getWidth() / 2, board->getHeight() * 0.6);
+	board->addChild(gameOverButton);
 
 	auto func = std::bind(&MainScene::GameOver, this);       //设置按钮点击函数
-	gameOver->setClickFunc(func);
+	gameOverButton->setClickFunc(func);
 
-	this->addChild(board);
+	this->addChild(board);                                   //隐藏结束面板
 	board->setVisible(false);
 
-	this->setAutoUpdate(false);
+	this->setAutoUpdate(false);                              //暂停事件循环
 }
 
 void MainScene::start()
-{//游戏开始清理场景, 随机初始化两个数字方块
+{//开始一轮新游戏游戏，隐藏结束面板，清理场景, 随机初始化两个数字方块
 	board->setVisible(false);
-	gameOver->setVisible(false);
+	gameOverButton->setVisible(false);
 
 	clear();
 
 	newBrick();
 	newBrick();
-	this->setAutoUpdate(true);
+	this->setAutoUpdate(true);              //启动事件循环
 }
 
 void MainScene::onUpdate()
-{//检测玩家输入并做出反应
+{//事件循环，检测玩家输入并做出反应
 	if (Input::isDown(KeyCode::Left))
 	{
 		move_to_left();
 		if (isGameOver())
 			end();
-		Sleep(200);
+		Sleep(250);
 	}
 	else if (Input::isDown(KeyCode::Right))
 	{
@@ -112,26 +112,26 @@ void MainScene::onUpdate()
 		move_to_right();
 		if (isGameOver())
 			end();
-		Sleep(200);
+		Sleep(250);
 	}
 	else if (Input::isDown(KeyCode::Up))
 	{
 		move_to_up();
 		if (isGameOver())
 			end();
-		Sleep(200);
+		Sleep(250);
 	}
 	else if (Input::isDown(KeyCode::Down))
 	{
 		move_to_down();
 		if (isGameOver())
 			end();
-		Sleep(200);
+		Sleep(250);
 	}
 }
 
 void MainScene::clear()
-{
+{//清空游戏痕迹，数字矩阵置零，数字方块全部隐藏
 	for (int i = 0; i < 4; i++)
 		for (int j = 0; j < 4; j++)
 		{
@@ -141,8 +141,8 @@ void MainScene::clear()
 }
 
 void MainScene::newBrick()
-{
-	std::vector<int> is, js;
+{//随机在空位产生一块2/4的数字方块
+	std::vector<int> is, js;             //记录空位的坐标
 	int number = 0;
 
 	for (int i = 0; i < 4; i++)
@@ -154,7 +154,7 @@ void MainScene::newBrick()
 				number++;
 			}
 
-	if (number == 0)
+	if (number == 0)                    //无空位，不产生方块
 		return;
 
 	int rand_num = Random::range(0, number - 1);
@@ -165,23 +165,23 @@ void MainScene::newBrick()
 }
 
 void MainScene::end()
-{
+{//输了或者赢了，停止事件循环，显示结束面板，分数，还有结束游戏按钮
 	this->setAutoUpdate(false);
 	scores->setText(std::to_wstring(score));
 	board->setVisible(true);
-	gameOver->setVisible(true);
+	gameOverButton->setVisible(true);
 }
 
 void MainScene::GameOver()
-{
+{//点击结束游戏按钮，调用GameOver函数，隐藏游戏场景及相关元素，返回菜单场景
 	board->setVisible(false);
-	gameOver->setVisible(false);
+	gameOverButton->setVisible(false);
 	this->setVisible(false);
 	SceneManager::back();
 }
 
 bool MainScene::isGameOver()
-{
+{//判断是否游戏结束
 	int x[4] = { 0, 0, 1,-1 },
 		y[4] = { 1,-1, 0, 0 };
 	for (int i = 0; i < 4; i++)
@@ -194,7 +194,7 @@ bool MainScene::isGameOver()
 			for (int p = 0; p < 4; p++)
 			{
 				int xl = i + x[p], yl = j + y[p];
-				if (xl >= 0 && xl < 4 && yl>0 && yl < 4 && (num[i][j] == num[xl][yl]))
+				if (xl >= 0 && xl < 4 && yl>=0 && yl < 4 && (num[i][j] == num[xl][yl]))
 					return false;
 			}
 		}
@@ -202,7 +202,7 @@ bool MainScene::isGameOver()
 }
 
 void MainScene::update_screen()
-{
+{//每次操作使数字矩阵发生改变时，同步更新数字方块
 	for (int i = 0; i < 4; i++)
 		for (int j = 0; j < 4; j++)
 		{
@@ -331,7 +331,7 @@ void MainScene::move_to_up()
 	int k, tag = 0;
 	for (int i = 0; i < 4; i++)
 	{
-		int b[4] = { 0 };                 //定义一个临时数组来存储相加之后的情况		
+		int b[4] = { 0 };                                 //定义一个临时数组来存储相加之后的情况		
 		k = 0;
 		for (int j = 0; j < 3; j++)
 		{
@@ -339,7 +339,7 @@ void MainScene::move_to_up()
 			{
 				int flag = 0;
 				for (int l = j + 1; l < 4; l++)
-				{    //找是否有相同的数				
+				{                                         //找是否有相同的数				
 					if (num[l][i] != 0)
 					{
 						flag = 1;
@@ -371,7 +371,7 @@ void MainScene::move_to_up()
 			}
 		}
 		for (int j = 0; j < 4; j++)
-			num[j][i] = b[j];      //将结果覆盖回去		
+			num[j][i] = b[j];                            //将结果覆盖回去		
 	}
 	if (tag)
 	{
@@ -383,15 +383,15 @@ void MainScene::move_to_up()
 void MainScene::move_to_down()
 {
 	int k, tag = 0;
-	for (int i = 0; i < 4; i++)  //从每一列开始
+	for (int i = 0; i < 4; i++)                          //从每一列开始
 	{
-		int b[4] = { 0 };				 //定义一个临时数组来存储相加之后的情况		
+		int b[4] = { 0 };				                 //定义一个临时数组来存储相加之后的情况		
 		k = 3;
 		for (int j = 3; j > 0; j--)
 		{
 			if (num[j][i] != 0) {
 				int flag = 0;
-				for (int l = j - 1; l >= 0; l--) //找是否有相同的数	
+				for (int l = j - 1; l >= 0; l--)         //找是否有相同的数	
 				{
 					if (num[l][i] != 0)
 					{
@@ -413,8 +413,8 @@ void MainScene::move_to_down()
 				if (flag == 0)b[k--] = num[j][i];
 			}
 		}
-		b[k] = num[0][i];                 //最后一个没有检查，赋值过去，不管是否为0，都无所谓的		
-		for (int j = 0; j < 4; j++) //检查是否有移动
+		b[k] = num[0][i];                                 //最后一个没有检查，赋值过去，不管是否为0，都无所谓的		
+		for (int j = 0; j < 4; j++)                       //检查是否有移动
 		{
 			if (num[j][i] != b[j]) {
 				tag = 1;
@@ -424,10 +424,9 @@ void MainScene::move_to_down()
 		for (int j = 0; j < 4; j++)
 			num[j][i] = b[j];
 	}
-	if (tag)
+	if (tag)                                              //存在移动，产生新的数
 	{
 		update_screen();
 		newBrick();
 	}
-	//存在移动，产生新的数
 }

@@ -4,13 +4,13 @@
 完成者: 李妍
 */
 
-
 #include <easy2d/easy2d.h>
 using namespace easy2d;
+
 class Brick :public Sprite
 {
 private:
-	int num;
+	int num;                  //方块所代表的数字
 public:
 	Brick();
 	Brick(int);
@@ -22,8 +22,10 @@ public:
 };
 
 //对应数字的位置加载对应的图片
-void Brick::loadpic() {
-	switch (num) {
+void Brick::loadpic() 
+{
+	switch (num) 
+	{
 	case 2:this->open(L"./image/pic_2.png"); break;
 	case 4:this->open(L"./image/pic_4.png"); break;
 	case 8:this->open(L"./image/pic_8.png"); break;
@@ -40,7 +42,8 @@ void Brick::loadpic() {
 }
 
 //开始游戏时随机产生2/4，并使产生2的概率是3/4，产生4的概率是1/4
-Brick::Brick() {
+Brick::Brick() 
+{
 	int ran_num = Random::range(1, 4);
 	if (ran_num == 4)
 	{
@@ -54,18 +57,21 @@ Brick::Brick() {
 }
 
 //测试时保证每张图片可用
-Brick::Brick(int n) {
+Brick::Brick(int n) 
+{
 	num = n;
 	loadpic();
 }
 
 //返回图片所代表的数字（用于计算）
-int Brick::get_num() {
+int Brick::get_num() 
+{
 	return num;
 }
 
-//每次操作时随机产生新的2/4
-void Brick::set_num() {
+//每次操作时随机产生新的2/4数字方块
+void Brick::set_num() 
+{
 	int ran_num = Random::range(1, 4);
 	if (ran_num == 4)
 	{
@@ -78,8 +84,9 @@ void Brick::set_num() {
 	loadpic();
 }
 
-//在数字改变时调用
-void Brick::set_num(int n) {
+//在数字改变时调用，改变方块代表的数字，并加载相应图片
+void Brick::set_num(int n) 
+{
 	num = n;
 	loadpic();
 }

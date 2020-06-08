@@ -2,7 +2,7 @@
 项目名称: 2048游戏
 组员: 陈家强,尹子鳗,李妍,张涔
 工具: VS 2019, Easy2D, PS
-分工: 陈家强->MainScene框架, 张涔->MainScene操作函数, 尹子鳗->Menu类, 李妍->Brick类
+分工: 陈家强->MainScene类框架, 张涔->MainScene类操作函数, 尹子鳗->Menu类, 李妍->Brick类
 (报告/尹子鳗, 游戏图片/陈家强)
 */
 
